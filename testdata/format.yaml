@@ -1,0 +1,7 @@
+recordDelimiterPattern: \n
+recordPattern: "(?P<var1>.*)(?P<var2>.*)"
+variables:
+  - name: var1
+    type: string
+  - name: var2
+    type: bool
