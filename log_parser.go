@@ -1,12 +1,20 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+	"regexp"
+	"strconv"
+	"time"
+)
+
 type varValue struct {
 	value    interface{}
 	variable variableDescriptor
 }
 
 func parseLogs(logs []byte, format formatDescriptor, out chan<- map[string]varValue) error {
-	logRecords := format.recordPattern.FindAllIndex(logs, -1)
+	logRecords := format.recordDelimiterPattern.FindAllIndex(logs, -1)
 
 	if logRecords == nil {
 		return nil
@@ -23,9 +31,13 @@ func parseLogs(logs []byte, format formatDescriptor, out chan<- map[string]varVa
 			recordEndIndex = logRecords[recordIndex+1][0]
 		}
 
-		varValue := parseLogRecord(logs[recordOffset[0]:recordEndIndex], format)
+		varValue, err := parseLogRecord(logs[recordOffset[0]:recordEndIndex], format)
 
 		if varValue == nil {
+			if err != nil {
+				fmt.Printf("Error pasing record at %v: %s\n", recordOffset[0], err.Error())
+			}
+
 			continue
 		}
 
@@ -35,6 +47,79 @@ func parseLogs(logs []byte, format formatDescriptor, out chan<- map[string]varVa
 	return nil
 }
 
-func parseLogRecord(record []byte, format formatDescriptor) map[string]varValue {
-	return nil, nil
+func parseLogRecord(record []byte, format formatDescriptor) (map[string]varValue, error) {
+	matchedStrings := parseLogRecordRaw(record, format.recordPattern)
+	if matchedStrings == nil {
+		return nil, errors.New("record was not matched")
+	}
+
+	result := map[string]varValue{}
+
+	for _, variable := range format.variables {
+		rawValue := matchedStrings[variable.name]
+		value, err := constructValue(rawValue, variable)
+		if err != nil {
+			return nil, err
+		}
+
+		result[variable.name] = value
+	}
+
+	return result, nil
+}
+
+func constructValue(rawValue string, varDescr variableDescriptor) (varValue, error) {
+	switch varDescr.varType {
+	case stringVarType:
+		return varValue{rawValue, varDescr}, nil
+
+	case boolVarType:
+		val, err := strconv.ParseBool(rawValue)
+		if err != nil {
+			return varValue{}, err
+		}
+
+		return varValue{val, varDescr}, nil
+
+	case intVarType:
+		val, err := strconv.Atoi(rawValue)
+		if err != nil {
+			return varValue{}, err
+		}
+
+		return varValue{val, varDescr}, nil
+
+	case timeVarType:
+		val, err := time.Parse(varDescr.layout, rawValue)
+		if err != nil {
+			return varValue{}, err
+		}
+
+		return varValue{val, varDescr}, nil
+
+	case durationVarType:
+		val, err := time.ParseDuration(rawValue)
+		if err != nil {
+			return varValue{}, err
+		}
+
+		return varValue{val, varDescr}, nil
+	default:
+		panic(fmt.Sprintf("Unknown variable type: %v", varDescr.varType))
+	}
+}
+
+func parseLogRecordRaw(record []byte, recordPattren regexp.Regexp) (result map[string]string) {
+	match := recordPattren.FindSubmatch(record)
+	if match == nil {
+		return nil
+	}
+
+	result = map[string]string{}
+
+	for subIndex, subName := range recordPattren.SubexpNames() {
+		result[subName] = string(match[subIndex])
+	}
+
+	return result
 }
