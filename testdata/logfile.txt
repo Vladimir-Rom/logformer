@@ -1,0 +1,13 @@
+﻿2021-05-12 13:26:55.391	-	17816	Information	Security	'ServiceAlive' packet #0 sending at 12.05.2021 13:26:50
+2021-05-12 13:26:57.945	-	17816	Verbose	SecurityService	Certificate  CN= chain validation result: Validating chain for certificate:  CN=
+RevocationStatusUnknown:The revocation function was unable to check revocation for the certificate.
+Success
+
+2021-05-12 13:26:59.488	-	17816	Information	Security	'ServiceAlive' packet #0 sent at 12.05.2021 13:26:50
+2021-05-12 13:26:59.523	-	17816	Verbose	SecurityService	Invoke method GetSerializedSettings.
+2021-05-12 13:26:59.537	-	17816	Verbose	SecurityService	Get channel. Operation name: GetSerializedSettings.
+2021-05-12 13:26:59.549	-	17816	Verbose	SecurityService	Channel number: 42. AcquireResult: True.
+2021-05-12 13:26:59.562	-	17816	Verbose	SecurityService	Creating gRPC channel with options grpc.ssl_target_name_override:, grpc.keepalive_time_ms:., grpc.keepalive_timeout_ms:., grpc.keepalive_permit_without_calls:1, grpc.http2.min_time_between_pings_ms:., grpc.http2.max_pings_without_data:0, grpc.max_receive_message_length:., grpc.max_send_message_length:., grpc.use_local_subchannel_pool:1, address .
+2021-05-12 13:26:59.696	-	17816	Verbose	SecurityService	Creating secure SSL credentials
+2021-05-12 13:26:59.706	-	17816	Verbose	SecurityService	Attempting to load native library "grpc_csharp_ext.x64.dll"
+2021-05-12 13:26:59.823	-	17816	Verbose	SecurityService	gRPC native library loaded successfully.

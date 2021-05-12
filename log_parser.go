@@ -13,11 +13,12 @@ type varValue struct {
 	variable variableDescriptor
 }
 
-func parseLogs(logs []byte, format formatDescriptor, out chan<- map[string]varValue) error {
+func parseLogs(logs []byte, format formatDescriptor) ([]map[string]varValue, error) {
+	out := []map[string]varValue{}
 	logRecords := format.recordDelimiterPattern.FindAllIndex(logs, -1)
 
 	if logRecords == nil {
-		return nil
+		return out, nil
 	}
 
 	recordsCount := len(logRecords)
@@ -41,10 +42,10 @@ func parseLogs(logs []byte, format formatDescriptor, out chan<- map[string]varVa
 			continue
 		}
 
-		out <- varValue
+		out = append(out, varValue)
 	}
 
-	return nil
+	return out, nil
 }
 
 func parseLogRecord(record []byte, format formatDescriptor) (map[string]varValue, error) {
@@ -109,7 +110,7 @@ func constructValue(rawValue string, varDescr variableDescriptor) (varValue, err
 	}
 }
 
-func parseLogRecordRaw(record []byte, recordPattren regexp.Regexp) (result map[string]string) {
+func parseLogRecordRaw(record []byte, recordPattren *regexp.Regexp) (result map[string]string) {
 	match := recordPattren.FindSubmatch(record)
 	if match == nil {
 		return nil

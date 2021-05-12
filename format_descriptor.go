@@ -8,8 +8,8 @@ import (
 )
 
 type formatDescriptor struct {
-	recordDelimiterPattern regexp.Regexp
-	recordPattern          regexp.Regexp
+	recordDelimiterPattern *regexp.Regexp
+	recordPattern          *regexp.Regexp
 	variables              []variableDescriptor
 }
 
@@ -53,14 +53,14 @@ func getFormatDescriptor(yamlContent []byte) (result formatDescriptor, err error
 		return result, err
 	}
 
-	result.recordDelimiterPattern = *recordDelimiterPattern
+	result.recordDelimiterPattern = recordDelimiterPattern
 
 	recordPattern, err := regexp.Compile(formatDescriptorRaw.RecordPattern)
 	if err != nil {
 		return result, err
 	}
 
-	result.recordPattern = *recordPattern
+	result.recordPattern = recordPattern
 
 	result.variables = make([]variableDescriptor, len(formatDescriptorRaw.Variables))
 

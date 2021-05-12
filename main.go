@@ -24,5 +24,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Format: %s", &format.recordDelimiterPattern)
+	fmt.Printf("Format: %s", format.recordDelimiterPattern)
 }

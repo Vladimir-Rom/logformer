@@ -18,7 +18,7 @@ a
 b
 c`)
 
-	result := parseLogRecordRaw([]byte("123"+multiLineString), *r)
+	result := parseLogRecordRaw([]byte("123"+multiLineString), r)
 
 	if result == nil {
 		t.Fatal("string was not parsed")
@@ -79,29 +79,24 @@ line
 multi
 line
 `)
-	parsingResult := make(chan map[string]varValue, 3)
-	err := parseLogs([]byte(logs), createFormatDescriptor(), parsingResult)
+	res, err := parseLogs([]byte(logs), createFormatDescriptor())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if l := len(parsingResult); l != 3 {
+	if l := len(res); l != 3 {
 		t.Fatalf("Unexpected log items count: %v", l)
 	}
 
-	res := <-parsingResult
-
-	if s := res["msg"].value.(string); strings.TrimSpace(s) != "first single line" {
+	if s := res[0]["msg"].value.(string); strings.TrimSpace(s) != "first single line" {
 		t.Errorf("Unexpected first message: %s", s)
 	}
 
-	if tm := res["time"].value.(time.Time); tm.Month() != 9 {
+	if tm := res[0]["time"].value.(time.Time); tm.Month() != 9 {
 		t.Errorf("Wrong time: %v", tm)
 	}
 
-	res = <-parsingResult
-
-	if s := res["msg"].value.(string); strings.TrimSpace(s) != secondLine {
+	if s := res[1]["msg"].value.(string); strings.TrimSpace(s) != secondLine {
 		t.Errorf("Unexpected second message: %s", s)
 	}
 }
@@ -110,8 +105,8 @@ func createFormatDescriptor() formatDescriptor {
 	delimeterPattern, _ := regexp.Compile(`\n(?:\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d)`)
 	messagePattern, _ := regexp.Compile(`(?P<time>\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d)(?s)(?P<msg>.*)`)
 	return formatDescriptor{
-		recordDelimiterPattern: *delimeterPattern,
-		recordPattern:          *messagePattern,
+		recordDelimiterPattern: delimeterPattern,
+		recordPattern:          messagePattern,
 		variables: []variableDescriptor{
 			{
 				name:    "time",
