@@ -79,10 +79,7 @@ line
 multi
 line
 `)
-	res, err := parseLogs([]byte(logs), createFormatDescriptor())
-	if err != nil {
-		t.Fatal(err)
-	}
+	res := parseLogs([]byte(logs), createFormatDescriptor())
 
 	if l := len(res); l != 3 {
 		t.Fatalf("Unexpected log items count: %v", l)

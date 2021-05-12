@@ -14,29 +14,18 @@ func parallelParseLogs(levelOfParallelism int, logs []byte, format formatDescrip
 	wg.Add(len(chunks))
 
 	chunkStart := 0
-	var resultError error
 	for i, chunk := range chunks {
 		chunkIndex := i
 		chunkStartCopy := chunkStart
 		chunkCopy := chunk
 		go func() {
 			defer wg.Done()
-			parsedChunk, err := parseLogs(logs[chunkStartCopy:chunkCopy], format)
-			if err != nil {
-				resultError = err
-			} else {
-				parsedChunks[chunkIndex] = parsedChunk
-			}
+			parsedChunks[chunkIndex] = parseLogs(logs[chunkStartCopy:chunkCopy], format)
 		}()
 
 		chunkStart = chunkCopy
 	}
 	wg.Wait()
-
-	if resultError != nil {
-		return nil, resultError
-	}
-
 	return mergeSlices(parsedChunks), nil
 }
 

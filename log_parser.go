@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type varValue struct {
@@ -13,12 +15,12 @@ type varValue struct {
 	variable variableDescriptor
 }
 
-func parseLogs(logs []byte, format formatDescriptor) ([]map[string]varValue, error) {
+func parseLogs(logs []byte, format formatDescriptor) []map[string]varValue {
 	out := []map[string]varValue{}
 	logRecords := format.recordDelimiterPattern.FindAllIndex(logs, -1)
 
 	if logRecords == nil {
-		return out, nil
+		return out
 	}
 
 	recordsCount := len(logRecords)
@@ -36,7 +38,7 @@ func parseLogs(logs []byte, format formatDescriptor) ([]map[string]varValue, err
 
 		if varValue == nil {
 			if err != nil {
-				fmt.Printf("Error pasing record at %v: %s\n", recordOffset[0], err.Error())
+				logrus.Errorf("Error pasing record at %v: %s\n", recordOffset[0], err.Error())
 			}
 
 			continue
@@ -45,7 +47,7 @@ func parseLogs(logs []byte, format formatDescriptor) ([]map[string]varValue, err
 		out = append(out, varValue)
 	}
 
-	return out, nil
+	return out
 }
 
 func parseLogRecord(record []byte, format formatDescriptor) (map[string]varValue, error) {
